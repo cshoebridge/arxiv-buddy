@@ -1,0 +1,20 @@
+[project]
+name = "arxiv-buddy"
+version = "0.1.0"
+description = "One hand-picked arXiv paper in your inbox every day, chosen by Claude to match your interests."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.69",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+arxiv-buddy = "arxiv_buddy.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/arxiv_buddy"]
