@@ -7,8 +7,11 @@ care about. Each run, Claude turns that description into a set of arXiv searches
 reads the candidate abstracts, picks the single best paper for you, and writes a
 short note on why it's worth your time. Papers already sent are never repeated.
 
-Recency is not a requirement. If a foundational paper from 2017 is the better read
-than today's preprint, that's what you get.
+# Warning 🚨
+This repo is almost ENTIRELY VIBE CODED. Very little has been checked by a human. Use at your own risk.
+
+# Contributing
+Contributions adding features / security improvements are very welcome.
 
 ## Setup
 
@@ -53,65 +56,6 @@ subfields, methods, and the kind of paper you want — for example:
 > Mechanistic interpretability of language models — sparse autoencoders, circuit
 > analysis, feature steering. I also care about evaluation methodology for LLM
 > agents. I value foundational papers as much as brand-new preprints.
-
-## Scheduling
-
-The command is one-shot: it picks a paper, sends it, and exits.
-
-### macOS (launchd) — recommended
-
-```bash
-./launchd/install.sh
-```
-
-Generates a plist into `~/Library/LaunchAgents` and loads it. Runs daily at
-07:30, survives reboots, and if the Mac is asleep at that time launchd runs the
-job shortly after it wakes rather than skipping the day. Use `--at HH:MM` for a
-different time, and re-run the script to update an installed job.
-
-The plist is generated rather than committed: launchd needs absolute paths to
-`uv`, to the project, and to the log, all of which are machine-specific. The
-script derives them and labels the job `com.<your-username>.arxiv-buddy`.
-
-Run it from your own terminal — `~/Library/LaunchAgents` is protected by macOS
-TCC, so the copy has to come from a process you launched interactively.
-
-Before installing, the script runs `arxiv-buddy check` with an empty environment
-and refuses to install if it fails — see the caveat below for why.
-
-```bash
-LABEL="com.$(id -un | tr -cd '[:alnum:]').arxiv-buddy"
-launchctl print gui/$(id -u)/$LABEL | head -20   # status
-launchctl kickstart -p gui/$(id -u)/$LABEL       # run now
-tail -f launchd/arxiv-buddy.log                  # logs
-./launchd/install.sh remove                      # uninstall
-```
-
-### cron
-
-```cron
-30 7 * * * cd /path/to/arxiv-buddy && /path/to/uv run arxiv-buddy run >> /tmp/arxiv-buddy.log 2>&1
-```
-
-### Two things any scheduler needs
-
-Both matter because schedulers run with almost no environment:
-
-- **Working directory.** `.env` is read from the current directory, so the job
-  must `cd` into the project (the plist does this via `WorkingDirectory`).
-  Without it the run fails immediately with `ARXIV_BUDDY_EMAIL is not set`.
-- **Absolute paths, and config in `.env` not your shell.** There is no useful
-  `PATH`, and your shell's exported variables are not inherited. Anything your
-  shell profile sets that the run depends on must be repeated in `.env` —
-  typically a custom `ANTHROPIC_BASE_URL`, an `HTTPS_PROXY`, or an
-  `SSL_CERT_FILE` pointing at a corporate CA bundle. Verify with:
-
-  ```bash
-  env -i HOME="$HOME" /path/to/uv run arxiv-buddy check --probe
-  ```
-
-  That strips the environment the way launchd does. If it passes there, the
-  scheduled run will work.
 
 ## Commands
 
